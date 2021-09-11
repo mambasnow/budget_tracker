@@ -1,7 +1,6 @@
-  
 {
-    "name": "Bucket Tracker",
-    "short_name": "Budget Tracker",
+    "name": "Progressive Budget",
+    "short_name": "Progressive Budget",
     "icons": [
       {
         "src": "/icons/icon-192x192.png",

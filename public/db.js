@@ -1,13 +1,13 @@
+/* IndexedDB script handles saving transactions when fetch request fails or device is offline */
 
-
-// Opens database ver 1
+// Opens database with version 1
 let db;
-const request = indexedDB.open('budgetDB', 1);
+const request = indexedDB.open('BudgetDB', 1);
 
 // create object store called "BudgetStore" and set autoIncrement to true
 request.onupgradeneeded = () => {
   db = request.result;
-  const objectStore = db.createObjectStore('budgetDB', {autoIncrement: true});
+  const objSave = db.createObjectStore('budgetSave', {autoIncrement: true});
 };
 
 // Checks the db once the app is online
@@ -15,38 +15,38 @@ request.onsuccess = () => {
   db = request.result;
 
   if (navigator.onLine) {
-    dbCheck();
+    checkDB();
   }
 };
 
-// If  error opening the db
-request.onerror = (event) => {
-  console.log(event);
+// If there was an error opening the db
+request.onerror = (e) => {
+  console.log(e);
 };
 
-// Saves the transaction to db
+// Saves the transaction to the indexedDB
 const saveRecord = (record) => {
-  // Makes a transaction on the pending db with readwrite access
-  // Creates an obj store on the transaction
-  // Add data to the store
-  const trans = db.transaction('budgetDB', 'readwrite');
-  const objectStore = trans.objectStore('budgetDB');
-  let addRequest = objectStore.add(record);
+  // Creates a transaction on the pending db with readwrite access
+  // Creates an object store on the transaction
+  // Add record to the store
+  const trans = db.transaction('budgetSave', 'readwrite');
+  const objSave = trans.objectStore('budgetSave');
+  let addRequest = objSave.add(record);
 
   addRequest.onsuccess = () => {
-    console.log('Record added successfully');
+    console.log('This Data was Saved');
   }
 
   addRequest.onerror = () => {
-    console.log("Failed to add record");
+    console.log("Error: Failed to Save");
   }
 }
 
 // Access the store, retrieves all data
-const dbCheck = () => {
-  const trans = db.transaction('budgetDB', 'readonly');
-  const objectStore = trans.objectStore('budgetDB'); 
-  let getAll = objectStore.getAll();
+const checkDB = () => {
+  const trans = db.transaction('budgetSave', 'readonly');
+  const objSave = trans.objectStore('budgetSave'); 
+  let getAll = objSave.getAll();
 
   getAll.onerror = () => {
     console.log('There was an error with getting all records.');
@@ -66,18 +66,21 @@ const dbCheck = () => {
         .then((response) => response.json())
         .then(() => {
           // Clear all items in the store after successful post
-          const trans = db.transaction('budgetDB', 'readwrite');
-          const objectStore = trans.objectStore('budgetDB');
-          let clearRequest = objectStore.clear();
+          const trans = db.transaction('budgetSave', 'readwrite');
+          const objSave = trans.objectStore('budgetSave');
+          let clearRequest = objSave.clear();
 
           clearRequest.onsuccess = () => {
-            console.log("DB cleared!");
+            console.log("IndexedDB cleared!");
           }
 
           clearRequest.onerror = () => {
-            console.log("An error was happened");
+            console.log("There was an error in clearing the db!");
           }
         });
     }
   };
 }
+
+// Checks the db for data when the device goes online
+window.addEventListener('online', checkDB);
