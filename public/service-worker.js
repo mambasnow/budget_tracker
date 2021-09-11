@@ -1,7 +1,7 @@
-const CACHE_NAME= "static-cache";
+const CACHE_NAME = "static-cache";
 const DATA_CACHE_NAME = "data-cache";
 
-const CachedFiles= [
+const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/index.js',
@@ -13,6 +13,7 @@ const CachedFiles= [
   '/manifest.webmanifest'
 ];
 
+// Install and register service worker
 self.addEventListener('install', (event) => {
 
     // Pre cache image data 
@@ -25,7 +26,7 @@ self.addEventListener('install', (event) => {
     // Pre cache all static assets 
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            cache.addAll(CachedFiles)
+            cache.addAll(FILES_TO_CACHE)
         })
     )
 
@@ -82,4 +83,3 @@ self.addEventListener('fetch', (event) => {
             })
         })
     )
-})

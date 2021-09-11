@@ -43,7 +43,7 @@ const saveRecord = (record) => {
 }
 
 // Access the store, retrieves all data
-const checkDB = () => {
+const dbCheck = () => {
   const trans = db.transaction('budgetDB', 'readonly');
   const objectStore = trans.objectStore('budgetDB'); 
   let getAll = objectStore.getAll();

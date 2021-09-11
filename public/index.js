@@ -12,7 +12,7 @@ fetch("/api/transaction")
     populateTotal();
     populateTable();
     populateChart();
-  });
+});
 
 function populateTotal() {
   // reduce transaction amounts to a single total value
@@ -71,8 +71,8 @@ function populateChart() {
         datasets: [{
             label: "Total Over Time",
             fill: true,
-            backgroundColor: "#6666ff",
-            data
+            backgroundColor: '#0a7e8c',
+            data,
         }]
     }
   });
@@ -151,4 +151,3 @@ document.querySelector("#add-btn").onclick = function() {
 document.querySelector("#sub-btn").onclick = function() {
   sendTransaction(false);
 };
-
