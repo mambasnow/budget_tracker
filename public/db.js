@@ -45,7 +45,7 @@ request.onsuccess = function(e){
     db = e.target.result;
 // Checks to see webapp is online before looking at the DB
     if (navigator.onLine){
-        checkDatabase();
+        dbCheck();
     }
 }
 
