@@ -3,8 +3,8 @@ let db;
 const request = indexedDB.open('budgetDB', 1);
 
 function dbCheck(){
-    const transaction = db.transaction(["pending"], "rewrite");
-    const store = transaction.objectStore("pending");
+    const transaction = db.transaction("budgetDB", "readonly");
+    const store = transaction.objectStore("budgetDB");
     const getAll = store.getAll();
 
 
@@ -21,8 +21,8 @@ function dbCheck(){
             })
             .then(response => response.json())
             .then(()=>{
-                const tranaction = db.tranaction(["Waiting"], "readwrite");
-                const store = transaction.objectStore("pending");
+                const tranaction = db.tranaction("budgetDB", "readwrite");
+                const store = transaction.objectStore("budgetDB");
                 store.clear();
             })
         }
@@ -30,14 +30,14 @@ function dbCheck(){
 }
 
 function delPending(){
-    const transaction = db.transaction(['Waiting'], "readwrite");
-    const store = transaction.objectStore(["waiting"]);
+    const transaction = db.transaction("budgetDB", "readwrite");
+    const store = transaction.objectStore("budgetDB");
     store.clear();
 }
 
 request.onupgradeneeded = function (e) {
     const db = e.target.result;
-    db.createObjectStore("Pending", {autoIncrement: true});
+    db.createObjectStore("budgetDB", {autoIncrement: true});
 }
 
 
