@@ -1,58 +1,83 @@
-// creates database vr. 1
+
+
+// Opens database ver 1
 let db;
 const request = indexedDB.open('budgetDB', 1);
 
-function dbCheck(){
-    const transaction = db.transaction("budgetDB", "readonly");
-    const store = transaction.objectStore("budgetDB");
-    const getAll = store.getAll();
+// create object store called "BudgetStore" and set autoIncrement to true
+request.onupgradeneeded = () => {
+  db = request.result;
+  const objectStore = db.createObjectStore('budgetDB', {autoIncrement: true});
+};
 
+// Checks the db once the app is online
+request.onsuccess = () => {
+  db = request.result;
 
-    getAll.onsuccess = function(){
-        if(getAll.result.length > 0){
-            fetch("/api/transaction/bullk",
-            {
-                method: "POST",
-                body: JSON.stringify(getAll.result),
-                headers:{
-                    Accept: "application/json, text/plain, */*",
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(response => response.json())
-            .then(()=>{
-                const tranaction = db.tranaction("budgetDB", "readwrite");
-                const store = transaction.objectStore("budgetDB");
-                store.clear();
-            })
-        }
-    };
+  if (navigator.onLine) {
+    dbCheck();
+  }
+};
+
+// If  error opening the db
+request.onerror = (event) => {
+  console.log(event);
+};
+
+// Saves the transaction to db
+const saveRecord = (record) => {
+  // Makes a transaction on the pending db with readwrite access
+  // Creates an obj store on the transaction
+  // Add data to the store
+  const trans = db.transaction('budgetDB', 'readwrite');
+  const objectStore = trans.objectStore('budgetDB');
+  let addRequest = objectStore.add(record);
+
+  addRequest.onsuccess = () => {
+    console.log('Record added successfully');
+  }
+
+  addRequest.onerror = () => {
+    console.log("Failed to add record");
+  }
 }
 
-function delPending(){
-    const transaction = db.transaction("budgetDB", "readwrite");
-    const store = transaction.objectStore("budgetDB");
-    store.clear();
-}
+// Access the store, retrieves all data
+const checkDB = () => {
+  const trans = db.transaction('budgetDB', 'readonly');
+  const objectStore = trans.objectStore('budgetDB'); 
+  let getAll = objectStore.getAll();
 
-request.onupgradeneeded = function (e) {
-    const db = e.target.result;
-    db.createObjectStore("budgetDB", {autoIncrement: true});
-}
+  getAll.onerror = () => {
+    console.log('There was an error with getting all records.');
+  }
 
+// If there are records in the db, post it to the server
+  getAll.onsuccess = () => {
+    if (getAll.result.length > 0) {
+      fetch('/api/transaction/bulk', {
+        method: 'POST',
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => response.json())
+        .then(() => {
+          // Clear all items in the store after successful post
+          const trans = db.transaction('budgetDB', 'readwrite');
+          const objectStore = trans.objectStore('budgetDB');
+          let clearRequest = objectStore.clear();
 
-request.onsuccess = function(e){
-    db = e.target.result;
-// Checks to see webapp is online before looking at the DB
-    if (navigator.onLine){
-        dbCheck();
+          clearRequest.onsuccess = () => {
+            console.log("DB cleared!");
+          }
+
+          clearRequest.onerror = () => {
+            console.log("An error was happened");
+          }
+        });
     }
+  };
 }
-
-// if db lookup has error console log  issue
-request.onerror = function(e){
-    console.log("Error =" + e.target.errorCode)
-}
-
-
-window.addEventListener("Online", dbCheck);
